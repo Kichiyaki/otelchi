@@ -3,6 +3,8 @@ package otelchi
 import (
 	"bufio"
 	"context"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"io"
 	"net"
 	"net/http"
@@ -12,7 +14,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/oteltest"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -131,10 +132,13 @@ func (rw *testResponseWriter) ReadFrom(r io.Reader) (n int64, err error) {
 
 func TestResponseWriterInterfaces(t *testing.T) {
 	// make sure the recordingResponseWriter preserves interfaces implemented by the wrapped writer
-	provider := oteltest.NewTracerProvider()
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithResource(resource.NewSchemaless()),
+	)
 
 	router := chi.NewRouter()
-	router.Use(Middleware("foobar", WithTracerProvider(provider)))
+	router.Use(Middleware("foobar", WithTracerProvider(tp)))
 	router.HandleFunc("/user/{id}", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Implements(t, (*http.Hijacker)(nil), w)
 		assert.Implements(t, (*http.Pusher)(nil), w)

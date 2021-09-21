@@ -6,13 +6,14 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/riandyrn/otelchi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/Kichiyaki/otelchi"
 )
 
 func ok(w http.ResponseWriter, _ *http.Request) {
